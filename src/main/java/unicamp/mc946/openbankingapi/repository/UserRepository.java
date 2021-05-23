@@ -7,5 +7,5 @@ import unicamp.mc946.openbankingapi.model.User;
 @Repository
 public interface UserRepository extends CrudRepository<User, String> {
 
-
+    User findByLogin(String login);
 }
