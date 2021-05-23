@@ -3,6 +3,8 @@ package unicamp.mc946.openbankingapi.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.stellar.sdk.Asset;
+import org.stellar.sdk.AssetTypeNative;
 import org.stellar.sdk.KeyPair;
 import unicamp.mc946.openbankingapi.model.User;
 import unicamp.mc946.openbankingapi.repository.UserRepository;
@@ -31,9 +33,17 @@ public class UserService {
         return stellarService.getBalancesForAccount(user.getStellarAccId());
     }
 
-    public String createTransaction(String login, String receiverAccId, Double amount) {
+    public String createTransaction(String login, String receiverAccId, Double amount, String assetName) {
+        Asset asset;
+        if("native".equals(assetName)){
+            asset = new AssetTypeNative();
+        }else {
+            KeyPair issuingKeys = KeyPair
+                    .fromSecretSeed("SCQVH5BPLHELP3O3TLZDINJYTCEQCPEXGU4F7RMARACGUBZ6IL4SSE56");
+            asset = Asset.createNonNativeAsset(assetName, issuingKeys.getAccountId());
+        }
         User user = userRepository.findByLogin(login);
 
-        return stellarService.createTransaction(user.getPrivateKey(), receiverAccId, amount);
+        return stellarService.createTransaction(user.getPrivateKey(), receiverAccId, amount, asset);
     }
 }

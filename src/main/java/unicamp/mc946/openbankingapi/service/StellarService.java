@@ -41,7 +41,7 @@ public class StellarService {
         return null;
     }
 
-    public String createTransaction(String senderSecretToken, String receiverAccountId, Double amount) {
+    public String createTransaction(String senderSecretToken, String receiverAccountId, Double amount, Asset asset) {
         KeyPair source = KeyPair.fromSecretSeed(senderSecretToken);
         KeyPair destination = KeyPair.fromAccountId(receiverAccountId);
 
@@ -50,14 +50,13 @@ public class StellarService {
         // the transaction fee when the transaction fails.
         // It will throw HttpResponseException if account does not exist or there was another error.
         try {
-            server.accounts().account(destination.getAccountId());
             AccountResponse sourceAccount = server.accounts().account(source.getAccountId());
 
             // If there was no error, load up-to-date information on your account.
 
             // Start building the transaction.
             Transaction transaction = new Transaction.Builder(sourceAccount, Network.TESTNET)
-                    .addOperation(new PaymentOperation.Builder(destination.getAccountId(), new AssetTypeNative(), amount.toString()).build())
+                    .addOperation(new PaymentOperation.Builder(destination.getAccountId(), asset, amount.toString()).build())
                     // A memo allows you to add your own metadata to a transaction. It's
                     // optional and does not affect how Stellar treats the transaction.
                     .addMemo(Memo.text("Test Transaction"))
@@ -69,7 +68,7 @@ public class StellarService {
             transaction.sign(source);
 
             SubmitTransactionResponse response = server.submitTransaction(transaction);
-            return response.toString();
+            return String.valueOf(response.isSuccess());
         } catch (Exception e) {
             System.out.println("Something went wrong!");
             System.out.println(e.getMessage());
@@ -96,9 +95,44 @@ public class StellarService {
         }
     }
 
-    public Asset createAsset(String name, String issuerAccId){
-        Asset asset = Asset.createNonNativeAsset(name, issuerAccId);
-        return asset;
+    public Asset issueAsset(String assetName, String issuerPrivateKey, Double value){
+        try {
+            KeyPair issuingKeys = KeyPair
+                    .fromSecretSeed("SCQVH5BPLHELP3O3TLZDINJYTCEQCPEXGU4F7RMARACGUBZ6IL4SSE56");
+            KeyPair receivingKeys = KeyPair
+                    .fromSecretSeed(issuerPrivateKey);
+
+            Asset asset = Asset.createNonNativeAsset(assetName, issuingKeys.getAccountId());
+
+            // First, the receiving account must trust the asset
+            AccountResponse receiving = server.accounts().account(receivingKeys.getAccountId());
+            Transaction allowAsset = new Transaction.Builder(receiving, Network.TESTNET)
+                    .addOperation(
+                            // The `ChangeTrust` operation creates (or alters) a trustline
+                            // The second parameter limits the amount the account can hold
+                            new ChangeTrustOperation.Builder(asset, "1000000").build())
+                    .setTimeout(180)
+                    .setBaseFee(100)
+                    .build();
+            allowAsset.sign(receivingKeys);
+            server.submitTransaction(allowAsset);
+
+            // Second, the issuing account actually sends a payment using the asset
+            AccountResponse issuing = server.accounts().account(issuingKeys.getAccountId());
+            Transaction issueAsset = new Transaction.Builder(issuing, Network.TESTNET)
+                    .addOperation(
+                            new PaymentOperation.Builder(receivingKeys.getAccountId(), asset, value.toString()).build())
+                    .setTimeout(180)
+                    .setBaseFee(100)
+                    .build();
+            issueAsset.sign(issuingKeys);
+            server.submitTransaction(issueAsset);
+
+            return asset;
+        } catch(Exception e){
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }
