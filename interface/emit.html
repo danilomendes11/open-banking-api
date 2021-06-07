@@ -26,17 +26,16 @@
     <!-- Page content wrapper-->
     <div id="page-content-wrapper">
         <div class="sidebar-toggle">
-            <h1 class="mt-4">Transferencia</h1>
-            <input type="text" id="login" class="name mt-4"> Login
+            <h1 class="mt-4">Emitir Moeda</h1>
+            <input type="text" id="nome" class="name mt-4"> Nome da moeda
             <br>
-            <input type="text" id="receiver" class="login mt-4"> Conta Recebedora
+            <input type="text" id="login" class="login mt-4"> Login que vai receber
             <br>
             <input type="text" id="amount" class="password mt-4"> Quantidade
             <br>
-            <input type="text" id="asset" class="password mt-4"> Moeda
+            <button id="emit" class="btn-primary">Emitir</button>
             <br>
-            <button id= "transferencia" class="btn-primary">Realizar transferência</button>
-            <p id="resposta-transferencia"></p>
+            <p id="resposta-emit"></p>
         </div>
     </div>
 </div>
@@ -44,16 +43,14 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
-    $("#transferencia").click(function() {
-        const receiverAccId = $("#receiver").val();
+    $("#emit").click(function() {
+        const name = $("#nome").val();
         const login = $("#login").val();
         const amount = $("#amount").val();
-        const asset = $("#asset").val();
-        const url = 'http://localhost:8080/transaction?login='+login+'&receiverAccId='+
-            receiverAccId+'&amount='+amount+'&assetName='+asset;
+        const url = 'http://localhost:8080/issue?name='+name+'&login='+login+'&amount='+amount;
         $.post( url,
             function( data ) {
-                $( "#resposta-transferencia" ).html( data );
+                $( "#resposta-emit" ).html( data );
             });
     });
 </script>

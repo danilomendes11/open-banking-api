@@ -1,16 +1,14 @@
 package unicamp.mc946.openbankingapi.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.stellar.sdk.AssetTypeNative;
 import unicamp.mc946.openbankingapi.model.User;
 import unicamp.mc946.openbankingapi.service.AssetService;
 import unicamp.mc946.openbankingapi.service.UserService;
 
 @RestController()
+@CrossOrigin
 public class UserController {
 
     @Autowired
@@ -51,9 +49,9 @@ public class UserController {
     }
 
     @PostMapping("/issue")
-    public String createAsset(@RequestParam String login, @RequestParam String name, @RequestParam Double amount){
-        assetService.issueAssetForAccount(name, login, amount);
-        return "Success";
+    public String createAsset(@RequestParam String login, @RequestParam String name, @RequestParam String amount){
+        assetService.issueAssetForAccount(name, login, Double.valueOf(amount));
+        return "Moeda com sucesso";
     }
 
 }
