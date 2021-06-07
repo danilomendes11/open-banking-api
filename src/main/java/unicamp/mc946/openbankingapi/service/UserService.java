@@ -33,7 +33,7 @@ public class UserService {
         return stellarService.getBalancesForAccount(user.getStellarAccId());
     }
 
-    public String createTransaction(String login, String receiverAccId, Double amount, String assetName) {
+    public String createTransaction(String login, String receiverAccId, String amount, String assetName) {
         Asset asset;
         if("native".equals(assetName)){
             asset = new AssetTypeNative();
@@ -44,6 +44,12 @@ public class UserService {
         }
         User user = userRepository.findByLogin(login);
 
-        return stellarService.createTransaction(user.getPrivateKey(), receiverAccId, amount, asset);
+        return stellarService.createTransaction(user.getPrivateKey(), receiverAccId, Double.valueOf(amount), asset);
+    }
+
+    public String getTransactions(String login){
+        User user = userRepository.findByLogin(login);
+
+        return stellarService.getTransactionsForAccount(user.getStellarAccId());
     }
 }

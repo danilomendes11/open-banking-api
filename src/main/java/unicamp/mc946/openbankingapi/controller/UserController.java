@@ -28,7 +28,7 @@ public class UserController {
     public String createUser(@RequestParam String name, @RequestParam String login, @RequestParam String password) {
         try {
             User user = userService.createUser(name, login, password);
-            return user.getStellarAccId();
+            return String.format("Usuário criado com sucesso. Número da conta: %s",user.getStellarAccId());
         } catch (Exception e) {
             return "Não foi possivel criar user";
         }
@@ -39,9 +39,14 @@ public class UserController {
         return userService.getBalance(login);
     }
 
+    @GetMapping("/transactions")
+    public String getTransactions(@RequestParam String login) {
+        return userService.getTransactions(login);
+    }
+
     @PostMapping("/transaction")
     public String createTransaction(@RequestParam String login, @RequestParam String receiverAccId,
-                                    @RequestParam Double amount, @RequestParam String assetName) {
+                                    @RequestParam String amount, @RequestParam String assetName) {
         return userService.createTransaction(login, receiverAccId, amount, assetName);
     }
 
