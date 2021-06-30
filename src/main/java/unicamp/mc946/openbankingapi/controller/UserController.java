@@ -17,11 +17,6 @@ public class UserController {
     @Autowired
     private AssetService assetService;
 
-    @GetMapping("/")
-    public String healthcheck(){
-        return "Sucesso";
-    }
-
     @PostMapping("/create")
     public String createUser(@RequestParam String name, @RequestParam String login, @RequestParam String password) {
         try {
@@ -35,11 +30,6 @@ public class UserController {
     @GetMapping("/balance")
     public String getBalance(@RequestParam String login) {
         return userService.getBalance(login);
-    }
-
-    @GetMapping("/transactions")
-    public String getTransactions(@RequestParam String login) {
-        return userService.getTransactions(login);
     }
 
     @PostMapping("/transaction")
